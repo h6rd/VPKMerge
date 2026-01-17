@@ -5,34 +5,46 @@ import glob
 import shutil
 import time
 import vpk
+import rich
 from send2trash import send2trash
 from rich.console import Console
 from rich.text import Text
 
+try:
+    from rich.console import Console
+    from rich.text import Text
+    HAS_RICH = True
+    console = Console()
+except ImportError:
+    HAS_RICH = False
 
-def print_ascii_art(console):
-    PURPLE = "#B486FF"
-    WHITE = "white"
+def print_ascii_art():
+    if HAS_RICH:
+        width = console.size.width
+        PURPLE = "#B486FF"
+        WHITE = "white"
 
-    art = Text()
-    art.append("██╗   ██╗██████╗ ██╗  ██╗", style=PURPLE)
-    art.append("███╗   ███╗███████╗██████╗  ██████╗ ███████╗\n", style=WHITE)
-    art.append("██║   ██║██╔══██╗██║ ██╔╝", style=PURPLE)
-    art.append("████╗ ████║██╔════╝██╔══██╗██╔════╝ ██╔════╝\n", style=WHITE)
-    art.append("██║   ██║██████╔╝█████╔╝ ", style=PURPLE)
-    art.append("██╔████╔██║█████╗  ██████╔╝██║  ███╗█████╗  \n", style=WHITE)
-    art.append("██║   ██║██╔═══╝ ██╔═██╗ ", style=PURPLE)
-    art.append("██║╚██╔╝██║██╔══╝  ██╔══██╗██║   ██║██╔══╝  \n", style=WHITE)
-    art.append("╚██████╔╝██║     ██║  ██╗", style=PURPLE)
-    art.append("██║ ╚═╝ ██║███████╗██║  ██║╚██████╔╝███████╗\n", style=WHITE)
-    art.append(" ╚═════╝ ╚═╝     ╚═╝  ╚═╝", style=PURPLE)
-    art.append("╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝\n", style=WHITE)
-    art.append("                      by @", style=WHITE)
-    art.append("dota2", style=WHITE)
-    art.append("pornfx", style=PURPLE)
+        lines = [
+            "██╗   ██╗██████╗ ██╗  ██╗███╗   ███╗███████╗██████╗  ██████╗ ███████╗",
+            "██║   ██║██╔══██╗██║ ██╔╝████╗ ████║██╔════╝██╔══██╗██╔════╝ ██╔════╝",
+            "██║   ██║██████╔╝█████╔╝ ██╔████╔██║█████╗  ██████╔╝██║  ███╗█████╗  ",
+            "╚██╗ ██╔╝██╔═══╝ ██╔═██╗ ██║╚██╔╝██║██╔══╝  ██╔══██╗██║   ██║██╔══╝  ",
+            " ╚████╔╝ ██║     ██║  ██╗██║ ╚═╝ ██║███████╗██║  ██║╚██████╔╝███████╗",
+            "  ╚═══╝  ╚═╝     ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝",
+            "by @dota2pornfx"
+        ]                                                   
 
-    console.print(art)
+        console.print()
+        for line in lines[:-1]:
+            console.print(Text(line.center(width), style=PURPLE))
+        console.print(Text(lines[-1].center(width), style=WHITE))
+        console.print()
 
+    else:
+        print("=" * 10)
+        print("VPKMerge")
+        print("by @dota2pornfx")
+        print("=" * 10 + "\n")
 
 def should_skip_file(file_path):
     filename = os.path.basename(file_path)
@@ -72,9 +84,11 @@ def extract_vpk(vpk_path, output_dir):
 def main():
     console = Console()
 
-    print_ascii_art(console)
+    print_ascii_art()
 
     vpks = glob.glob("*.vpk")
+
+    vpks.sort(key=lambda x: (os.path.basename(x).startswith('!'), os.path.basename(x)))
 
     if not vpks:
         console.print("No VPK files found in the current directory.", style="red")
