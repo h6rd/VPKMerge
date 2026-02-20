@@ -1,12 +1,9 @@
-# Build: pyinstaller --onefile --console --collect-all vpk --collect-all send2trash --collect-all rich --name "VPKMerge" --icon=icon.ico VPKMerge.py
-
 import os
 import glob
 import shutil
 import time
 import vpk
 import rich
-from send2trash import send2trash
 from rich.console import Console
 from rich.text import Text
 
@@ -130,7 +127,7 @@ def main():
                     )
 
             console.print(Text(f"  Extracted {extracted_count} files", style="green"))
-            send2trash(vpk_file)
+            os.remove(vpk_file)
         else:
             console.print(Text(f"Failed to extract {vpk_file}", style="red"))
 

@@ -1,0 +1,80 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyinstaller vpk rich
+
+      - name: Build
+        run: pyinstaller --onefile --console --collect-all vpk --collect-all rich --name "VPKMerge" --icon=icon.ico VPKMerge.py
+
+      - name: Zip
+        run: |
+          New-Item -ItemType Directory -Path VPKMerge
+          Copy-Item dist\VPKMerge.exe VPKMerge\VPKMerge.exe
+          Compress-Archive -Path VPKMerge -DestinationPath VPKMerge-Win.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: VPKMerge-Win.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyinstaller vpk rich
+
+      - name: Build
+        run: ppyinstaller --onefile --console --collect-all vpk --collect-all rich --name "VPKMerge" VPKMerge.py
+
+      - name: Zip
+        run: |
+          mkdir -p VPKMerge
+          cp dist/VPKMerge VPKMerge/VPKMerge
+          zip -r VPKMerge-Linux.zip VPKMerge
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: VPKMerge-Linux.zip
+
+  release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-build
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            VPKMerge-Win.zip
+            VPKMerge-Linux.zip
