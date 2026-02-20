@@ -45,7 +45,7 @@ jobs:
         run: pip install pyinstaller vpk rich
 
       - name: Build
-        run: ppyinstaller --onefile --console --collect-all vpk --collect-all rich --name "VPKMerge" VPKMerge.py
+        run: pyinstaller --onefile --console --collect-all vpk --collect-all rich --name "VPKMerge" VPKMerge.py
 
       - name: Zip
         run: |
