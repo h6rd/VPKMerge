@@ -241,7 +241,7 @@ def main():
     vpks = glob.glob("*.vpk")
     vpks.sort(
         key=lambda x: (
-            not os.path.basename(x).startswith("!"),
+            os.path.basename(x).startswith("!"),
             os.path.basename(x).lower(),
         )
     )
