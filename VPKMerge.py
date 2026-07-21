@@ -1,5 +1,6 @@
 import os
 import glob
+import re
 import shutil
 import time
 import random
@@ -53,9 +54,14 @@ def rprint(msg, style="white"):
 
 
 # Extract
+GARBAGE_SUFFIX_RE = re.compile(r'[^a-zA-Z0-9]$')
+
+
 def should_skip_file(file_path):
     filename = os.path.basename(file_path)
     if '"' in filename:
+        return True
+    if GARBAGE_SUFFIX_RE.search(filename):
         return True
     return False
 
