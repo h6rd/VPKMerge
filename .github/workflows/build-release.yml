@@ -82,14 +82,6 @@ jobs:
         with:
           name: linux-build
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: windows-binary
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: linux-binary
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -97,5 +89,32 @@ jobs:
           files: |
             VPKMerge-Win.zip
             VPKMerge-Linux.zip
-            VPKMerge.exe
-            VPKMerge
+
+  publish-binaries:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-binary
+          path: binaries
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-binary
+          path: binaries
+
+      - name: Commit updated binaries
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add binaries/VPKMerge.exe binaries/VPKMerge
+          git commit -m "Update VPKMerge binaries (${{ github.ref_name }})" --allow-empty
+          git push origin HEAD:${{ github.event.repository.default_branch }}
